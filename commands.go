@@ -1,18 +1,38 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 )
 
-type Command func(args []string) error
+func init() {
+	Register("echo", cmdEcho)
+	Register("cat", cmdCat)
+}
 
-var commands = make(map[string]Command)
-
-func Register(name string, cmd Command) error {
-	if commands[name] != nil {
-		return errors.New(fmt.Sprintf("command %q already registered", name))
-	}
-	commands[name] = cmd
+func cmdEcho(args []string) error {
+	fmt.Println(strings.Join(args[1:], " "))
 	return nil
+}
+
+func cmdCat(args []string) error {
+	var err error
+	for _, arg := range args[1:] {
+		f, err := os.Open(arg)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(os.Stdout, f)
+		if err != nil {
+			f.Close()
+			return err
+		}
+		err = f.Close()
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }

@@ -23,8 +23,6 @@ func run() error {
 	}
 	defer rl.Close()
 
-	Register("echo", cmdEcho)
-
 	for {
 		line, err := rl.Readline()
 		if err != nil { // io.EOF
@@ -40,12 +38,11 @@ func run() error {
 			fmt.Fprintf(os.Stderr, "%s: command not found\n", fields[0])
 			continue
 		}
-		cmd(fields)
+		err = cmd(fields)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", fields[0], err.Error())
+			continue
+		}
 	}
-	return nil
-}
-
-func cmdEcho(args []string) error {
-	fmt.Println(strings.Join(args[1:], " "))
 	return nil
 }
