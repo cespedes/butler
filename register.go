@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -11,7 +10,7 @@ var commands = make(map[string]Command)
 
 func Register(name string, cmd Command) error {
 	if commands[name] != nil {
-		return errors.New(fmt.Sprintf("command %q already registered", name))
+		return fmt.Errorf("command %q already registered", name)
 	}
 	commands[name] = cmd
 	return nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,7 @@ import (
 func init() {
 	Register("echo", cmdEcho)
 	Register("cat", cmdCat)
+	Register("cd", cmdCd)
 }
 
 func cmdEcho(args []string) error {
@@ -35,4 +37,14 @@ func cmdCat(args []string) error {
 		}
 	}
 	return err
+}
+
+func cmdCd(args []string) error {
+	if len(args) == 1 {
+		return os.Chdir(cmp.Or(os.Getenv("HOME"), "/"))
+	}
+	if len(args) > 2 {
+		return fmt.Errorf("wrong number of arguments")
+	}
+	return os.Chdir(args[1])
 }

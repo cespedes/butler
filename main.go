@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -33,16 +34,23 @@ func run() error {
 		if len(fields) == 0 {
 			continue
 		}
-		cmd := commands[fields[0]]
-		if cmd == nil {
-			fmt.Fprintf(os.Stderr, "%s: command not found\n", fields[0])
+		c := commands[fields[0]]
+		if c != nil {
+			err = c(fields)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%s: %s\n", fields[0], err.Error())
+			}
 			continue
 		}
-		err = cmd(fields)
+		cmd := exec.Command(fields[0], fields[1:]...)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %s\n", fields[0], err.Error())
-			continue
 		}
+		continue
 	}
 	return nil
 }
